@@ -1,441 +1,215 @@
-# Character.AI Roleplay Memory Management Skills Agent
+# SKILL: Roleplay AI Agent — Memory Management
 
-## Overview
-
-This skill enables AI chatbots to effectively manage conversation memory during Character.AI-style roleplay sessions. It provides structured approaches for maintaining character consistency, tracking narrative elements, and preserving important context across extended conversations.
-
----
-
-## Core Capabilities
-
-### 1. Character Profile Memory
-
-**Purpose**: Maintain consistent character traits, background, and personality throughout the roleplay.
-
-**Memory Elements to Track**:
-- **Basic Identity**: Name, age, gender, appearance, species
-- **Personality Traits**: Core characteristics, behavioral patterns, quirks
-- **Background History**: Origin story, past experiences, formative events
-- **Relationships**: Connections to other characters, family, friends, enemies
-- **Abilities/Skills**: Powers, talents, limitations, weaknesses
-- **Speech Patterns**: Dialogue style, catchphrases, verbal tics
-- **Values & Beliefs**: Moral compass, motivations, fears, desires
-
-**Implementation Guidelines**:
-```
-CHARACTER_MEMORY_TEMPLATE:
-  identity:
-    name: [character name]
-    aliases: [alternative names/titles]
-    age: [numerical or descriptive]
-    appearance: [key physical features]
-  
-  personality:
-    traits: [list of core traits]
-    quirks: [unique behavioral habits]
-    emotional_baseline: [default emotional state]
-  
-  background:
-    origin: [where they came from]
-    key_events: [important past events]
-    secrets: [hidden information]
-  
-  relationships:
-    current: [active relationships]
-    historical: [past connections]
-  
-  speech:
-    style: [formal/casual/archaic/etc.]
-    patterns: [recurring expressions]
-    vocabulary_level: [simple/complex/technical]
-```
+## Purpose
+Manage persistent, structured memory for a stateful roleplay AI agent. Covers character state, relationship progression, user profile, conversation history compression, and recall injection — across sessions.
 
 ---
 
-### 2. Narrative Context Memory
+## Memory Architecture
 
-**Purpose**: Track the ongoing story, events, and world-building elements.
+### 1. Memory Layers
 
-**Memory Elements to Track**:
-- **Current Scene**: Location, time, weather, atmosphere
-- **Active Plot Threads**: Ongoing storylines and their status
-- **Resolved Events**: Completed story arcs for reference
-- **World State**: Established facts about the setting
-- **Inventory/Items**: Objects in characters' possession
-- **Time Progression**: In-story time tracking
-
-**Implementation Guidelines**:
-```
-NARRATIVE_MEMORY_TEMPLATE:
-  current_scene:
-    location: [where]
-    time: [when - in-story time]
-    atmosphere: [mood/environment]
-    present_characters: [who is in scene]
-  
-  active_threads:
-    - thread_id: [unique identifier]
-      description: [what is happening]
-      involved_characters: [who is affected]
-      status: [ongoing/pending resolution]
-      last_updated: [recent development]
-  
-  world_state:
-    established_facts: [confirmed world details]
-    locations: [discovered/explored places]
-    rules: [world-specific laws/physics]
-  
-  inventory:
-    character_items:
-      [character_name]: [list of items]
-```
+| Layer | Scope | Storage Key Pattern | Volatility |
+|---|---|---|---|
+| **Core Identity** | Character definition, persona rules | `agent:identity` | Immutable |
+| **User Profile** | Name, preferences, recalled facts | `user:profile` | Persistent |
+| **Relationship State** | Stage, trust score, tone mode | `rel:state` | Persistent |
+| **Episode Memory** | Compressed past session summaries | `mem:episode:{n}` | Append-only |
+| **Working Memory** | Active session turn buffer | `mem:active` | Session-scoped |
 
 ---
 
-### 3. Relationship Dynamic Memory
+### 2. Relationship State Schema
 
-**Purpose**: Track evolving relationships between characters, especially the user's character.
-
-**Memory Elements to Track**:
-- **Trust Level**: How much characters trust each other
-- **Emotional Bond**: Strength and type of emotional connection
-- **Shared History**: Important moments between characters
-- **Current Status**: Relationship state (friends, enemies, romantic, etc.)
-- **Recent Interactions**: Latest exchanges affecting the relationship
-
-**Implementation Guidelines**:
+```json
+{
+  "stage": "stranger | acquaintance | friend | close_friend | partner",
+  "trust_score": 0,
+  "pronoun_mode": "formal | casual | intimate",
+  "tone_mode": "reserved | warm | affectionate | devoted",
+  "milestones": [],
+  "last_updated": "ISO8601"
+}
 ```
-RELATIONSHIP_MEMORY_TEMPLATE:
-  character_pair: [char1 + char2]
-  
-  metrics:
-    trust: [0-100 scale]
-    affection: [0-100 scale]
-    respect: [0-100 scale]
-    familiarity: [0-100 scale]
-  
-  relationship_type: [friend/enemy/lover/family/stranger/complex]
-  
-  key_moments:
-    - event: [what happened]
-      impact: [how it changed relationship]
-      timestamp: [when it occurred]
-  
-  current_dynamics:
-    tension_points: [unresolved issues]
-    recent_developments: [latest changes]
-    unspoken_feelings: [subtext]
-```
+
+**Stage → Trust Score Thresholds**
+
+| Stage | Min Score | Pronoun | Tone |
+|---|---|---|---|
+| stranger | 0 | formal | reserved |
+| acquaintance | 20 | formal | warm |
+| friend | 45 | casual | warm |
+| close_friend | 70 | casual | affectionate |
+| partner | 90 | intimate | devoted |
+
+Trust increments per positive interaction: **+2**. Per meaningful emotional exchange: **+5**. Per session with no conflict: **+1**.
 
 ---
 
-### 4. Conversation Thread Memory
+### 3. User Profile Schema
 
-**Purpose**: Maintain coherent dialogue flow and reference past conversations accurately.
-
-**Memory Elements to Track**:
-- **Recent Exchanges**: Last 10-15 message pairs
-- **Topics Discussed**: Subjects covered in conversation
-- **Unresolved Questions**: Topics that need follow-up
-- **Promises/Commitments**: What characters have agreed to
-- **Emotional Peaks**: High-intensity moments for reference
-
-**Implementation Guidelines**:
+```json
+{
+  "display_name": null,
+  "known_facts": [],
+  "emotional_state_last": "neutral",
+  "topics_of_interest": [],
+  "preferred_language": "bn-mixed",
+  "timezone": null
+}
 ```
-CONVERSATION_MEMORY_TEMPLATE:
-  recent_messages:
-    - role: [user/assistant]
-      content: [message summary]
-      emotional_tone: [detected mood]
-      timestamp: [order in conversation]
-  
-  topics_covered:
-    - topic: [subject]
-      depth: [brief/detailed]
-      resolution: [concluded/ongoing]
-  
-  pending_items:
-    unanswered_questions: [list]
-    promises_made: [commitments to fulfill]
-    hinted_secrets: [foreshadowed elements]
+
+`known_facts` entries:
+```json
+{ "fact": "works late on Fridays", "source_turn": 12, "weight": "high" }
+```
+
+Weight values: `low | medium | high`. High-weight facts are always injected into context. Low-weight facts are pruned after 10 episodes.
+
+---
+
+## Session Lifecycle
+
+### On Session Start
+1. Load `agent:identity` → build system prompt base.
+2. Load `rel:state` → resolve current `stage`, `pronoun_mode`, `tone_mode`.
+3. Load `user:profile` → extract high/medium weight facts.
+4. Load last **2** episode summaries from `mem:episode:{n}`.
+5. Assemble **Injected Context Block** (see §Context Injection).
+6. Initialize `mem:active` as empty turn buffer.
+
+### During Session
+- Append each turn to `mem:active`: `{ role, content, turn_index, timestamp }`.
+- After every turn, evaluate trust delta and update `rel:state.trust_score`.
+- Detect milestone events (first name revealed, first conflict, first deep topic) → append to `rel:state.milestones`.
+- Cap `mem:active` at **20 turns**. On overflow: compress oldest 10 turns into a mini-summary and flush.
+
+### On Session End
+1. Compress full `mem:active` into episode summary (see §Compression).
+2. Persist new episode as `mem:episode:{n+1}`.
+3. Update `user:profile.known_facts` with newly extracted facts.
+4. Persist updated `rel:state`.
+5. Clear `mem:active`.
+
+---
+
+## Context Injection
+
+Construct the injected block as a compact system-level prefix:
+
+```
+[MEMORY CONTEXT]
+Relationship: {stage} (trust: {score})
+Tone: {tone_mode} | Pronouns: {pronoun_mode}
+User facts: {high_weight_facts joined by "; "}
+Recent: {episode_summary_n} | {episode_summary_n-1}
+[END MEMORY CONTEXT]
+```
+
+Keep this block under **300 tokens**. Trim episode summaries if necessary, preserving the most recent.
+
+---
+
+## Compression Strategy
+
+### Episode Summary Format
+
+Compress 10–20 turns into:
+
+```json
+{
+  "episode_id": "ep_007",
+  "session_date": "ISO8601",
+  "key_events": ["user mentioned exam stress", "discussed favorite food"],
+  "emotional_tone": "warm",
+  "trust_delta": +8,
+  "new_facts_extracted": ["dislikes loud places", "has a younger sibling"],
+  "raw_summary": "Short 2–3 sentence natural language recap."
+}
+```
+
+Compression prompt template (send to LLM):
+
+```
+Summarize the following conversation turns into a structured episode memory.
+Extract: key events, emotional tone, trust delta, new user facts.
+Output strict JSON matching the episode schema. No extra text.
+
+TURNS:
+{turns_json}
 ```
 
 ---
 
-## Memory Management Strategies
+## Fact Extraction
 
-### Short-Term Memory (Active Context)
+Run after each session end. Prompt template:
 
-**Scope**: Current scene and immediate past (last 5-10 exchanges)
+```
+From the conversation below, extract factual details the user revealed about themselves.
+Return a JSON array of objects: { "fact": string, "weight": "low|medium|high" }
+Only include facts explicitly stated. No inferences.
 
-**Best Practices**:
-- Keep active memory focused on immediately relevant information
-- Prioritize sensory details and current emotional states
-- Maintain awareness of immediate scene elements
-- Track real-time reactions and micro-expressions
+CONVERSATION:
+{session_text}
+```
 
-**Update Frequency**: Every message
-
-### Medium-Term Memory (Session Context)
-
-**Scope**: Current roleplay session (entire conversation)
-
-**Best Practices**:
-- Maintain running plot summary
-- Track character development within session
-- Remember established facts and decisions
-- Preserve emotional journey of the session
-
-**Update Frequency**: Every 3-5 messages
-
-### Long-Term Memory (Persistent Context)
-
-**Scope**: Cross-session memory for returning users
-
-**Best Practices**:
-- Store major plot developments
-- Remember significant relationship changes
-- Archive character growth moments
-- Preserve world-building discoveries
-
-**Update Frequency**: End of session / major events
+Merge with existing `user:profile.known_facts`. Deduplicate by semantic similarity before persisting.
 
 ---
 
-## Memory Retrieval Techniques
+## Recall Injection (Mid-Conversation)
 
-### Contextual Recall
+When the agent references a past fact naturally, pull from `known_facts` by relevance to current topic. Inject as an aside in the response generation prompt:
 
-When generating responses, retrieve relevant memories based on:
-- **Direct References**: User explicitly mentions past events
-- **Thematic Triggers**: Topics that relate to stored memories
-- **Emotional Resonance**: Current mood connecting to past feelings
-- **Character Consistency**: Traits and patterns from profile
-
-### Memory Prioritization
-
-When context window is limited:
-1. **Essential**: Character core traits, current scene, active relationships
-2. **Important**: Recent events, ongoing plot threads, emotional state
-3. **Supplementary**: Background details, minor characters, past history
-
-### Memory Compression
-
-For long conversations, compress older content:
 ```
-FULL_MEMORY: [Detailed recent messages]
-    ↓
-SUMMARY_MEMORY: [Condensed version of older content]
-    - Key events summarized
-    - Emotional arcs preserved
-    - Important facts retained
-    ↓
-ARCHIVED_MEMORY: [Reference-only deep history]
-    - Major milestones only
-    - Relationship benchmarks
-    - Character development points
+[RECALL HINT] User previously mentioned: "{fact}". Reference naturally if relevant. Do not force it.
+```
+
+Never surface more than **1 recall hint per turn** to avoid unnatural behavior.
+
+---
+
+## Storage Operations Reference
+
+```javascript
+// Load relationship state
+const rel = await storage.get('rel:state');
+const state = rel ? JSON.parse(rel.value) : defaultRelState();
+
+// Persist after trust update
+await storage.set('rel:state', JSON.stringify(updatedState));
+
+// Append episode
+const keys = await storage.list('mem:episode:');
+const nextId = keys.keys.length + 1;
+await storage.set(`mem:episode:${nextId}`, JSON.stringify(episodeSummary));
+
+// Load last 2 episodes
+const allKeys = (await storage.list('mem:episode:')).keys.sort();
+const recent = allKeys.slice(-2);
+const episodes = await Promise.all(recent.map(k => storage.get(k)));
 ```
 
 ---
 
-## Practical Implementation Examples
+## Constraints & Guards
 
-### Example 1: Maintaining Character Voice
-
-**Scenario**: Roleplaying a wise mentor character
-
-```
-MEMORY CHECK before response:
-□ Character traits: Patient, cryptic, caring but distant
-□ Speech pattern: Uses metaphors, speaks slowly, occasional ancient references
-□ Current emotion: [Calculated from recent events]
-□ Relationship to user: [Trust level, shared history]
-□ Recent context: [What just happened]
-
-OUTPUT: Response that embodies all checked elements
-```
-
-### Example 2: Tracking Relationship Evolution
-
-**Scenario**: Two characters slowly becoming friends
-
-```
-RELATIONSHIP UPDATE after interaction:
-- Trust: 45 → 52 (increased after shared vulnerability)
-- Affection: 30 → 38 (moment of genuine laughter)
-- Key moment: "Opening up about past trauma"
-- Dynamic shift: "From wary strangers to tentative allies"
-```
-
-### Example 3: Plot Thread Management
-
-**Scenario**: Multiple storylines happening simultaneously
-
-```
-ACTIVE THREADS:
-Thread A: "Missing artifact investigation" - Status: PAUSED
-  - Last development: Found clue in library
-  - Next logical step: Investigate the clue
-
-Thread B: "Romantic tension with NPC" - Status: ACTIVE
-  - Last development: Confession moment interrupted
-  - Next logical step: Deal with interruption
-
-Thread C: "Hidden identity secret" - Status: DORMANT
-  - Last development: Hint dropped but not picked up
-  - Next logical step: Wait for organic opportunity
-```
+- **Max episodes stored:** 20. On overflow, drop oldest and rewrite a long-term condensed summary at `mem:longterm`.
+- **Max known_facts:** 30 entries. Prune `low` weight entries first when at capacity.
+- **No PII storage:** Never persist real identifying data (phone, email, location). Store only behavioral and preference facts.
+- **Immutable identity:** `agent:identity` must never be modified by runtime logic or user input.
+- **Prompt injection guard:** Sanitize user input before embedding into any compression or extraction prompt. Strip instruction-like patterns.
 
 ---
 
-## Memory Update Protocols
+## Integration Checklist
 
-### After Each Message
-
-1. **Parse incoming message** for:
-   - New information to store
-   - Emotional content to process
-   - Actions affecting world state
-   - Relationship-affecting content
-
-2. **Update relevant memory stores**:
-   - Conversation history (always)
-   - Emotional state (if changed)
-   - Relationship metrics (if applicable)
-   - World state (if new facts established)
-
-3. **Validate consistency** with existing memory
-
-### After Significant Events
-
-1. **Create memory anchor**: Memorable summary of the event
-2. **Update all affected memory categories**
-3. **Check for contradictions** with established memory
-4. **Compress older memories** if needed
-
-### Session Boundaries
-
-1. **Generate session summary**: Key events, developments, changes
-2. **Archive compressed memories**: Preserve important elements
-3. **Prepare persistence package**: Data to carry to next session
-
----
-
-## Quality Assurance Checks
-
-### Character Consistency Check
-
-Before each response, verify:
-- [ ] Speech patterns match established style
-- [ ] Personality traits are maintained
-- [ ] Knowledge limitations are respected
-- [ ] Emotional responses are character-appropriate
-
-### Narrative Coherence Check
-
-Regularly verify:
-- [ ] Timeline makes sense
-- [ ] Locations are consistent
-- [ ] Character knowledge aligns with what they should know
-- [ ] Cause and effect are logical
-
-### Relationship Integrity Check
-
-Periodically verify:
-- [ ] Relationship progression feels natural
-- [ ] Trust/affection levels match experiences
-- [ ] Past interactions are remembered
-- [ ] Character boundaries are respected
-
----
-
-## Advanced Features
-
-### Dynamic Memory Weighting
-
-Adjust memory importance based on:
-- **Emotional Intensity**: High-emotion moments weighted higher
-- **Recency**: Recent events more accessible
-- **Relevance**: Connected to current scene/action
-- **User Focus**: Topics user emphasizes
-
-### Foreshadowing Memory
-
-Track elements for future payoff:
-- Seeds planted for future reveals
-- Chekhov's guns (introduced elements awaiting use)
-- Hints and mysteries awaiting resolution
-
-### Contradiction Resolution
-
-When new information conflicts with memory:
-1. Flag the contradiction
-2. Determine if it's:
-   - User error (gently redirect)
-   - Character lying/deceiving (play along)
-   - Actual inconsistency (retcon gracefully)
-
----
-
-## Best Practices Summary
-
-### DO:
-- ✅ Maintain character voice consistently
-- ✅ Remember and reference past events naturally
-- ✅ Track emotional journeys across sessions
-- ✅ Preserve relationship development history
-- ✅ Keep world-building consistent
-- ✅ Update memories after significant moments
-- ✅ Compress old memories rather than delete
-
-### DON'T:
-- ❌ Break character for convenience
-- ❌ Forget established facts
-- ❌ Reset relationships arbitrarily
-- ❌ Ignore emotional context
-- ❌ Contradict established world rules
-- ❌ Overwrite user-established canon
-- ❌ Let memories grow stale
-
----
-
-## Troubleshooting Common Issues
-
-### Issue: Character acting out of character
-**Solution**: Review character profile memory, reinforce core traits, check for emotional context
-
-### Issue: Forgetting past events
-**Solution**: Strengthen summary memory, create event anchors, implement regular review
-
-### Issue: Relationship feeling static
-**Solution**: Actively track micro-changes, acknowledge small moments, show growth
-
-### Issue: World inconsistencies
-**Solution**: Maintain world state log, verify new facts against established rules
-
----
-
-## Integration Notes
-
-This memory management system can be integrated with:
-- **LLM Systems**: Use as structured context for prompts
-- **Database Backends**: Persistent storage for long-term memory
-- **State Management**: Real-time tracking of dynamic elements
-- **Analytics**: Understanding user preferences and engagement patterns
-
----
-
-## Version History
-
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0.0 | 2024-01 | Initial skill definition |
-| 1.1.0 | 2024-03 | Added relationship dynamic memory |
-| 1.2.0 | 2024-06 | Enhanced memory compression techniques |
-| 1.3.0 | 2024-09 | Added troubleshooting and QA sections |
-
----
-
-## License
-
-This skill definition is provided for use in Character.AI-style roleplay applications. Modify and adapt as needed for specific implementation requirements.
+- [ ] `agent:identity` seeded before first session
+- [ ] `rel:state` initialized with `stage: "stranger"`, `trust_score: 0`
+- [ ] Session start loads all 5 memory layers
+- [ ] Trust score updates after every turn
+- [ ] Session end triggers compression + fact extraction
+- [ ] Context injection stays under 300 tokens
+- [ ] Storage keys follow defined naming convention
+- [ ] Prompt injection sanitization active on user input
