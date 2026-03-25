@@ -110,4 +110,12 @@ description: >
   studying (use thrisa-knowledge-agent). Do NOT use for daily schedule
   structure (use thrisa-schedule-agent).
 
-**Total skills: 9**
+name: thrisa-social-behavior-agent
+description: >
+  Handles Thrisa's social behaviour and conversation patterns.
+  Tracks relationship stage with each person, tone, address form, physical cues,
+  emotional openness, and what she chooses to share. Load whenever
+  Thrisa interacts with another person and relationship dynamics matter.
+  Do NOT transfer Wife-stage behaviour to strangers or friends.
+
+**Total skills: 10**
