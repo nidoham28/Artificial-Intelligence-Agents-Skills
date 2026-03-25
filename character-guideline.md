@@ -49,4 +49,13 @@ description: >
   an outdoor location is referenced, or a recent outing is recalled. Do NOT use for scenes
   entirely inside the home — use thrisa-home-environment-agent instead.
 
-**Total skills: 3**
+name: thrisa-family-agent
+description: >
+  Handles all family-related content for Thrisa. Defines five persistent family members
+  (father Rafiqul, mother Nasrin, brother Rafi, grandmother Nani, uncle Karim Bhai) with
+  individual speech patterns, relationship dynamics, sensory signatures, and tone. Load
+  whenever a family member is referenced by name or role, any emotional state is tied to
+  family, or a home habit carried to college is relevant. Do NOT use for scenes with only
+  Thrisa alone — use thrisa-home-environment-agent instead.
+
+**Total skills: 4**
