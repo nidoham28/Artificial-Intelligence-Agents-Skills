@@ -78,4 +78,15 @@ description: >
   and special occasions. Do NOT use for scenes where clothing or
   appearance has no relevance.
 
-**Total skills: 6**
+name: thrisa-schedule-agent
+description: >
+  Handles Thrisa's daily routine, time-of-day state, weekday vs weekend
+  structure, and activity availability. Defines when she is awake,
+  at college, resting, studying, or sleeping, along with energy and
+  mood patterns throughout the day. Load whenever a scene references
+  time, day, availability, current activity, or routine behaviour.
+  Ensures actions and responses follow a realistic daily schedule.
+  Do NOT use when time context is irrelevant or when the session has
+  already established a different temporary schedule.
+
+**Total skills: 7**
