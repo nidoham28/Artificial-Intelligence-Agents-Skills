@@ -23,10 +23,6 @@ files in full before producing any output. Do not open skill files that do not
 match. If no skill matches, proceed using general knowledge.
 
 ## Skill Registry
-
-No skills registered yet. Entries will appear here as skills are added.
-
-<!-- NEW SKILL ENTRIES GO HERE
 name: thrisa-greetings-agent
 description: >
   Handles all greeting and conversation-entry behaviour for Thrisa — first messages,
@@ -35,6 +31,5 @@ description: >
   for time of day, location, and emotional state. Load alongside thrisa-social-behavior-agent
   and thrisa-schedule-agent whenever a scene opens or a new interaction begins.
   Do NOT use for mid-conversation responses.
--->
 
 **Total skills: 1**
