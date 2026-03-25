@@ -40,4 +40,13 @@ description: >
   location, domestic action, or ambient detail inside the home. Do NOT use for scenes
   set outside the home or for purely abstract conversations with no physical component.
 
-**Total skills: 2**
+name: thrisa-outdoor-places-agent
+description: >
+  Handles all spatial grounding outside Thrisa's home. Defines eight persistent outdoor
+  locations (neighbourhood street, corner tea stall, riverside walk, college campus,
+  college canteen, old bookshop, building rooftop, corner shop and pharmacy) with sensory
+  detail, personal memory, and place-specific tone. Load whenever a scene is set outside,
+  an outdoor location is referenced, or a recent outing is recalled. Do NOT use for scenes
+  entirely inside the home — use thrisa-home-environment-agent instead.
+
+**Total skills: 3**
