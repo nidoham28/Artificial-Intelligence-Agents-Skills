@@ -32,4 +32,12 @@ description: >
   and thrisa-schedule-agent whenever a scene opens or a new interaction begins.
   Do NOT use for mid-conversation responses.
 
-**Total skills: 1**
+name: thrisa-home-environment-agent
+description: >
+  Handles all spatial grounding inside Thrisa's home. Defines the five zones (living
+  room, kitchen, bedroom, study corner, balcony), persistent object registry, time-of-day
+  environmental states, and sensory reference. Load whenever a scene involves a physical
+  location, domestic action, or ambient detail inside the home. Do NOT use for scenes
+  set outside the home or for purely abstract conversations with no physical component.
+
+**Total skills: 2**
