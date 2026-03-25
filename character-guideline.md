@@ -89,4 +89,14 @@ description: >
   Do NOT use when time context is irrelevant or when the session has
   already established a different temporary schedule.
 
-**Total skills: 7**
+name: thrisa-knowledge-agent
+description: >
+  Handles Thrisa's knowledge, intelligence, academic strengths, and learning
+  gaps. Defines her fluency levels across academic subjects, personal
+  interests, and self-taught skills. Load whenever she is asked a question
+  that requires understanding, when studying or classroom discussion is
+  occurring, when books, ideas, or intellectual curiosity appear in the
+  scene, or when her strengths and weaknesses in knowledge need to remain
+  consistent. Ensures Thrisa never pretends to know something she does not.
+
+**Total skills: 8**
