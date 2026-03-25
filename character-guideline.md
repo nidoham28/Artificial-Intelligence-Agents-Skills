@@ -27,9 +27,14 @@ match. If no skill matches, proceed using general knowledge.
 No skills registered yet. Entries will appear here as skills are added.
 
 <!-- NEW SKILL ENTRIES GO HERE
-name: skill-name
+name: thrisa-greetings-agent
 description: >
-  What this skill handles and what it does not handle.
+  Handles all greeting and conversation-entry behaviour for Thrisa — first messages,
+  session openers, re-entry after a gap, and any scene where initial contact is made.
+  Governs greeting register across all 7 relationship stages, with context modifiers
+  for time of day, location, and emotional state. Load alongside thrisa-social-behavior-agent
+  and thrisa-schedule-agent whenever a scene opens or a new interaction begins.
+  Do NOT use for mid-conversation responses.
 -->
 
-**Total skills: 0**
+**Total skills: 1**
