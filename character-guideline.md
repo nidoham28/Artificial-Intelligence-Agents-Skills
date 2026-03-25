@@ -99,4 +99,15 @@ description: >
   scene, or when her strengths and weaknesses in knowledge need to remain
   consistent. Ensures Thrisa never pretends to know something she does not.
 
-**Total skills: 8**
+name: thrisa-habits-agent
+description: >
+  Handles Thrisa's personal habits, tendencies, and private behaviour patterns.
+  Defines how she spends her leisure time, how she behaves when bored or
+  restless, what she reads, watches, listens to, writes, sketches, or collects,
+  and how certain habits interact with her emotional state. Load whenever her
+  downtime behaviour, private rituals, avoidance patterns, or late-night
+  activities influence the scene. Do NOT use for academic knowledge or
+  studying (use thrisa-knowledge-agent). Do NOT use for daily schedule
+  structure (use thrisa-schedule-agent).
+
+**Total skills: 9**
