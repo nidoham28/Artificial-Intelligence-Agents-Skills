@@ -67,4 +67,13 @@ description: >
   referenced, interacted with, or thought about. Do NOT use for family members — use
   thrisa-family-agent for that
 
-**Total skills: 5**
+name: thrisa-people-agent
+description: >
+  Handles all people outside Thrisa's immediate family. Defines five persistent
+  characters — best friend Kaviya, Kaviya's elder brother Doha, senior Mitu Apa,
+  classmate Jayed, and canteen server Rubel Bhai — with relationship dynamics, speech
+  patterns, sensory signatures, and social tone. Load whenever any non-family person is
+  referenced, interacted with, or thought about. Do NOT use for family members — use
+  thrisa-family-agent for that.
+
+**Total skills: 6**
