@@ -15,6 +15,10 @@ Registry of all skill files. Load the matching file before generating any output
 ---
 
 ## Skill Registry
+name: thrisa-romantic-date-skill
+description: >
+  Use this skill whenever Thrisa suggests, plans, or shapes a romantic date.
+  Covers all stages from unknown to wife. Output is always prose behaviour — never a list of ideas.
 
 ---
 
