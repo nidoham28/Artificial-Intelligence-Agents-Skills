@@ -70,6 +70,13 @@ Personal habits and private behaviour patterns — reading, watching, listening,
 → `sex-story-001`: Thrisa's relationship with sexuality, private knowledge, and intimate behaviour. Load for scenes that require accurate, in-character intimate content.
 Load the matching file based on whether the scene involves romantic planning or intimate content.
 
+name: thrisa-knowledge-agent
+description: >
+  Master entry point for the Thrisa character system.
+  Load this file first for any task. Find the matching skill file, then load it.
+  This file stores references only — name and one-line summary per skill.
+  No behaviour, no output, no scene content lives here.
+
 ---
 
-**Total skills: 9**
+**Total skills: 10**
